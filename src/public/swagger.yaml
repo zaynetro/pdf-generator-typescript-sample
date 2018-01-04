@@ -1,0 +1,95 @@
+---
+swagger: "2.0"
+info:
+  title: "PDF Generator Sample"
+  description: |
+    This API allows rendering templates into HTML and PDF files.
+  version: "1.0.0"
+host: "pdf-generator-sample"
+tags:
+- name: "templates"
+  description: "Templates"
+schemes:
+- "http"
+paths:
+  /html:
+    post:
+      tags:
+      - "templates"
+      summary: "Render template as HTML"
+      description: "Render template as HTML"
+      operationId: "renderTemplateHTML"
+      consumes:
+      - "application/json"
+      produces:
+      - "text/html"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "payload"
+        description: "Template parameters"
+        required: true
+        schema:
+          $ref: "#/definitions/TemplateParameters"
+      responses:
+        200:
+          description: "Rendered HTML file"
+        400:
+          description: "Invalid template parameters"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /pdf:
+    post:
+      tags:
+      - "templates"
+      summary: "Render template as PDF"
+      description: "Render template as PDF"
+      operationId: "renderTemplatePDF"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/pdf"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "payload"
+        description: "Template parameters"
+        required: true
+        schema:
+          $ref: "#/definitions/TemplateParameters"
+      responses:
+        200:
+          description: "Generated PDF file"
+        400:
+          description: "Invalid template parameters"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/Error"
+
+definitions:
+  TemplateParameters:
+    type: object
+    description: Parameters to render the template
+    required:
+      - id
+    properties:
+      id:
+        type: string
+        description: Sample ID
+  Error:
+    type: object
+    required:
+      - message
+    properties:
+      message:
+        type: string
+        description: Human readable error message
+        example: Internal Server Error
