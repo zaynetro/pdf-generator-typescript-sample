@@ -5,6 +5,7 @@ import * as os from 'os';
 import * as crypto from 'crypto';
 import * as path from 'path';
 import * as Ajv from 'ajv';
+import * as puppeteer from 'puppeteer';
 
 import { ClientError, ServerError } from '../models/Errors';
 
@@ -36,10 +37,10 @@ export default class TemplateController {
   }
 
   /**
-   * POST /pdf
-   * Render template as PDF
+   * POST /pdf/phantom
+   * Render template as PDF with PhantomJS
    */
-  async renderPDF(req: Request, res: Response, next: NextFunction) {
+  async renderPDFPhantom(req: Request, res: Response, next: NextFunction) {
     const instance = await phantom.create();
     const page = await instance.createPage();
 
@@ -100,4 +101,67 @@ export default class TemplateController {
     // We always need to terminate phantom process
     instance.exit();
   }
+
+
+  /**
+   * POST /pdf/puppeteer
+   * Render template as PDF with Puppeteer
+   */
+  async renderPDFPuppeteer(req: Request, res: Response, next: NextFunction) {
+    const browser = await puppeteer.launch({
+      // https://github.com/GoogleChrome/puppeteer/blob/master/docs/troubleshooting.md#tips
+      args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox']
+    });
+    const page = await browser.newPage();
+
+    let numberOfRequests = 0;
+    await page.setRequestInterception(true);
+
+    page.on('request', (interceptedRequest: puppeteer.Request) => {
+      // We need to override the first request we send
+      // to render HTML. Other requests for CSS and images
+      // should not be touched.
+      // https://github.com/GoogleChrome/puppeteer/issues/1062
+      const overrides = (numberOfRequests === 0) ?
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [process.env.TRACING_HEADER]: res.locals.tracingId,
+          },
+          postData: JSON.stringify(req.body),
+        } :
+        {};
+      numberOfRequests++;
+      interceptedRequest.continue(overrides);
+    });
+
+    // No matter the Host we know that our app will be running locally in a k8s pod.
+    // This URL is accessed by a chrome process locally that's why
+    // we are using localhost.
+    const uri = `http://localhost:${req.socket.localPort}/html`;
+    console.log('Opening', uri, 'to render PDF');
+
+    const response = await page.goto(uri, { waitUntil: 'networkidle2' });
+
+    if (!response) {
+      next(new ServerError('No response from HTML rendering'));
+    } else if (response.ok) {
+      await page.emulateMedia('screen');
+      const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+      res.send(pdfBuffer);
+    } else if (response.status >= 400) {
+      const content = await response.text();
+      next(response.status < 500
+        ? new ClientError(content)
+        : new ServerError(content)
+      );
+    } else {
+      next(new ServerError('HTML rendering failed'));
+    }
+
+    // We always need to terminate puppeteer process
+    await browser.close();
+  }
+
 }

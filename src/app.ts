@@ -37,7 +37,8 @@ async function createApp() {
    * Routes
    */
   app.post('/html', templates.renderHTML.bind(templates));
-  app.post('/pdf', templates.renderPDF.bind(templates));
+  app.post('/pdf/phantom', templates.renderPDFPhantom.bind(templates));
+  app.post('/pdf/puppeteer', templates.renderPDFPuppeteer.bind(templates));
 
   // Error handling
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {

@@ -39,10 +39,10 @@ describe('POST /html', () => {
 });
 
 describe('POST /pdf', () => {
-  it('should success to render PDF', () => {
+  it('should success to render PDF with Phantom', () => {
     return createApp().then(app =>
       request(app)
-      .post('/pdf')
+      .post('/pdf/phantom')
       .send(payload)
       .expect(200)
       .expect('Content-Type', /pdf/)
@@ -54,7 +54,7 @@ describe('POST /pdf', () => {
 
     return createApp().then(app =>
       request(app)
-      .post('/pdf')
+      .post('/pdf/phantom')
       // Send incomplete delivery note view
       .send({})
       .expect(400)
@@ -62,6 +62,16 @@ describe('POST /pdf', () => {
       .then(res => {
         expect(res.body).toHaveProperty('message');
       })
+    );
+  });
+
+  it('should success to render PDF with Puppeteer', () => {
+    return createApp().then(app =>
+      request(app)
+      .post('/pdf/puppeteer')
+      .send(payload)
+      .expect(200)
+      .expect('Content-Type', /octet-stream/)
     );
   });
 });

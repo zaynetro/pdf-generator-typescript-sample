@@ -2,10 +2,10 @@
 
 **TODO:** Add blog post link
 
-Generate PDF files with PhantomJS.
+Generate PDF files with PhantomJS and Puppeteer.
 
-Provide means for rendering templates into HTML. Use PhantomJS to render
-HTML files into PDF documents.
+Provide means for rendering templates into HTML. Use PhantomJS or
+Puppeteer to render HTML files into PDF documents.
 
 - [Docker](https://docs.docker.com/engine/installation/)
 - Node.js (prefer versions v8.9.3+)
