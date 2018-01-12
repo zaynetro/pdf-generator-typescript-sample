@@ -43,13 +43,44 @@ paths:
           schema:
             $ref: "#/definitions/Error"
 
-  /pdf:
+  /pdf/phantom:
     post:
       tags:
       - "templates"
-      summary: "Render template as PDF"
-      description: "Render template as PDF"
-      operationId: "renderTemplatePDF"
+      summary: "Render template as PDF with PhantomJS"
+      description: "Render template as PDF with PhantomJS"
+      operationId: "renderTemplatePDFPhantom"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/pdf"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "payload"
+        description: "Template parameters"
+        required: true
+        schema:
+          $ref: "#/definitions/TemplateParameters"
+      responses:
+        200:
+          description: "Generated PDF file"
+        400:
+          description: "Invalid template parameters"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /pdf/puppeteer:
+    post:
+      tags:
+      - "templates"
+      summary: "Render template as PDF with Puppeteer"
+      description: "Render template as PDF with Puppeteer"
+      operationId: "renderTemplatePDFPuppeteer"
       consumes:
       - "application/json"
       produces:

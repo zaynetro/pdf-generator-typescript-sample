@@ -2,7 +2,8 @@
 
 **TODO:** Add blog post link
 
-Generate PDF files with PhantomJS and Puppeteer.
+This is a sample project to show how PDF files can
+be generated with PhantomJS and Puppeteer.
 
 Provide means for rendering templates into HTML. Use PhantomJS or
 Puppeteer to render HTML files into PDF documents.
