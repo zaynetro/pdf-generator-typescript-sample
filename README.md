@@ -1,7 +1,5 @@
 # PDF Generator Sample
 
-**TODO:** Add blog post link
-
 This is a sample project to show how PDF files can
 be generated with PhantomJS and Puppeteer.
 
